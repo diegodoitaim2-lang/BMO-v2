@@ -41,6 +41,14 @@ export function Sidebar({ navItems, active, onSelect, mood, system }: SidebarPro
         </div>
       </div>
 
+      <div className="sidebar-scene" aria-hidden="true">
+        <div className="sidebar-scene-copy">
+          <span className="eyebrow">Cenario</span>
+          <strong>Quarto do BMO</strong>
+          <p>Luzes neon, noite e detalhes do mundo ao redor.</p>
+        </div>
+      </div>
+
       <nav className="sidebar-nav">
         {navItems.map((item) => {
           const Icon = icons[item.id] || Bot
