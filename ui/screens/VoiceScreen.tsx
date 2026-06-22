@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Mic, Volume2 } from 'lucide-react'
 import { apiPost } from '../lib/api'
-import type { BootstrapData, SettingsState } from '../lib/types'
+import type { AvatarMood, BootstrapData, SettingsState } from '../lib/types'
 import { ScreenShell } from '../components/ScreenShell'
 import { StatusPill } from '../components/StatusPill'
 
@@ -27,9 +27,10 @@ interface WhisperTestResponse {
 interface VoiceScreenProps {
   data: BootstrapData | null
   onRefresh?: () => Promise<void> | void
+  setMood?: (mood: AvatarMood) => void
 }
 
-export function VoiceScreen({ data, onRefresh }: VoiceScreenProps) {
+export function VoiceScreen({ data, onRefresh, setMood }: VoiceScreenProps) {
   const voices = data?.voices.voices || []
   const selectedVoiceFallback = data?.voices.selected || data?.settings?.app?.voice?.model || 'pt_BR-faber-medium.onnx'
   const [selectedVoice, setSelectedVoice] = useState(() => selectedVoiceFallback)
@@ -66,6 +67,7 @@ export function VoiceScreen({ data, onRefresh }: VoiceScreenProps) {
       return
     }
     setBusy('speak')
+    setMood?.('speaking')
     setSpeakMessage('Gerando audio de teste...')
     try {
       const response = await apiPost<SpeakResponse>('/api/speak', {
@@ -79,16 +81,21 @@ export function VoiceScreen({ data, onRefresh }: VoiceScreenProps) {
       audioRef.current?.pause()
       const audio = new Audio(response.audioDataUrl)
       audioRef.current = audio
+      audio.addEventListener('ended', () => {
+        setMood?.('idle')
+      }, { once: true })
       try {
         await audio.play()
       } catch {
         setSpeakMessage(`${response.message} O audio foi gerado, mas o navegador bloqueou a reproducao automatica.`)
+        setMood?.('idle')
         return
       }
       const duration = typeof response.durationMs === 'number' && response.durationMs > 0 ? ` (${Math.round(response.durationMs / 1000)} s)` : ''
       setSpeakMessage(`${response.message}${duration} Voz ${response.voice || selectedVoice} reproduzida.`)
     } catch (error) {
       setSpeakMessage(error instanceof Error ? error.message : 'Falha ao testar a voz.')
+      setMood?.('error')
     } finally {
       setBusy(null)
     }
@@ -96,6 +103,7 @@ export function VoiceScreen({ data, onRefresh }: VoiceScreenProps) {
 
   async function testWhisper() {
     setBusy('whisper')
+    setMood?.('listening')
     setWhisperMessage('Gravando microfone por alguns segundos...')
     setTranscript('')
     try {
@@ -107,8 +115,10 @@ export function VoiceScreen({ data, onRefresh }: VoiceScreenProps) {
       setTranscript(transcriptText || (response.ok ? 'Nenhuma fala reconhecida.' : ''))
     } catch (error) {
       setWhisperMessage(error instanceof Error ? error.message : 'Falha ao testar o Whisper.')
+      setMood?.('error')
     } finally {
       setBusy(null)
+      setMood?.('idle')
     }
   }
 

@@ -1,17 +1,5 @@
-import idleFace from '../assets/faces/idle.png'
-import listeningFace from '../assets/faces/listening.png'
-import thinkingFace from '../assets/faces/thinking.png'
-import speakingFace from '../assets/faces/speaking-01.png'
-import errorFace from '../assets/faces/error.png'
 import type { AvatarMood } from '../lib/types'
-
-const FACE_BY_MOOD: Record<AvatarMood, string> = {
-  idle: idleFace,
-  listening: listeningFace,
-  thinking: thinkingFace,
-  speaking: speakingFace,
-  error: errorFace,
-}
+import appIcon from '../assets/bmo/bmo-icon.png'
 
 interface BmoAvatarProps {
   mood: AvatarMood
@@ -21,7 +9,7 @@ interface BmoAvatarProps {
 export function BmoAvatar({ mood, label }: BmoAvatarProps) {
   return (
     <div className={`bmo-avatar mood-${mood}`}>
-      <img src={FACE_BY_MOOD[mood]} alt={label || mood} />
+      <img className="bmo-avatar-face" src={appIcon} alt={label || 'BMO'} />
       {label && <span>{label}</span>}
     </div>
   )

@@ -431,11 +431,14 @@ function createTray() {
 function createWindow() {
   const icon = iconPath();
   mainLog(`creating window packaged=${app.isPackaged} icon=${icon || 'none'} projectRoot=${projectRoot()} resources=${resourcesRoot()}`);
+  const { workArea } = screen.getPrimaryDisplay();
+  const width = Math.min(1280, workArea.width);
+  const height = Math.min(820, workArea.height);
   mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 820,
-    minWidth: 980,
-    minHeight: 680,
+    width,
+    height,
+    minWidth: Math.min(980, workArea.width),
+    minHeight: Math.min(680, workArea.height),
     title: 'BMO',
     icon: icon || undefined,
     backgroundColor: '#020b09',

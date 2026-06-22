@@ -12,7 +12,7 @@ export type PanelId =
   | 'Sistema'
   | 'Configuracoes'
 
-export type AvatarMood = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error'
+export type AvatarMood = 'warmup' | 'idle' | 'listening' | 'thinking' | 'speaking' | 'error'
 
 export interface VoiceModel {
   file: string

@@ -31,6 +31,15 @@ interface SidebarProps {
 }
 
 export function Sidebar({ navItems, active, onSelect, mood, system }: SidebarProps) {
+  const statusText = {
+    warmup: 'Aguardando Hey BMO',
+    idle: 'Aguardando Hey BMO',
+    listening: 'Escutando...',
+    thinking: 'Pensando...',
+    speaking: 'Falando...',
+    error: 'BMO encontrou um problema',
+  }[mood]
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -38,14 +47,6 @@ export function Sidebar({ navItems, active, onSelect, mood, system }: SidebarPro
         <div>
           <strong>BMO-V2</strong>
           <p>{system?.runtime?.ready ? 'Motor local pronto' : 'Aguardando configuracao'}</p>
-        </div>
-      </div>
-
-      <div className="sidebar-scene" aria-hidden="true">
-        <div className="sidebar-scene-copy">
-          <span className="eyebrow">Cenario</span>
-          <strong>Quarto do BMO</strong>
-          <p>Luzes neon, noite e detalhes do mundo ao redor.</p>
         </div>
       </div>
 
@@ -63,13 +64,12 @@ export function Sidebar({ navItems, active, onSelect, mood, system }: SidebarPro
       </nav>
 
       <div className="sidebar-footer">
-        <div className="sidebar-stat">
-          <span>Provider</span>
-          <strong>{system?.provider?.name || 'nao definido'}</strong>
-        </div>
-        <div className="sidebar-stat">
-          <span>Modelo</span>
-          <strong>{system?.provider?.model || 'nenhum'}</strong>
+        <div className="sidebar-status">
+          <span className={mood === 'idle' ? 'pulse-dot' : 'pulse-dot active'} />
+          <span>
+            {statusText}
+            <small>BMO v1.0.0</small>
+          </span>
         </div>
       </div>
     </aside>

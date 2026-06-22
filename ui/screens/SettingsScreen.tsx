@@ -9,7 +9,18 @@ interface SettingsScreenProps {
   onRefresh?: () => Promise<void> | void
 }
 
-const THEMES = ['cartoon', 'led', 'bmo-face', 'treehouse', 'night-forest', 'dark', 'soft'] as const
+const SCENE_THEMES = [
+  { value: 'cartoon', label: 'BMO Cartoon' },
+  { value: 'bmo-face', label: 'BMO Close' },
+  { value: 'treehouse', label: 'Casa da Arvore' },
+  { value: 'night-forest', label: 'Floresta Noturna' },
+] as const
+
+const SIMPLE_THEMES = [
+  { value: 'led', label: 'Verde LED' },
+  { value: 'dark', label: 'BMO Escuro' },
+  { value: 'soft', label: 'BMO Suave' },
+] as const
 
 export function SettingsScreen({ data, onRefresh }: SettingsScreenProps) {
   const [language, setLanguage] = useState(() => data?.settings?.app?.language || 'pt-BR')
@@ -53,9 +64,20 @@ export function SettingsScreen({ data, onRefresh }: SettingsScreenProps) {
         <label>
           Tema
           <select value={theme} onChange={(event) => setTheme(event.target.value)}>
-            {THEMES.map((item) => (
-              <option key={item} value={item}>{item}</option>
-            ))}
+            <optgroup label="Cenarios ilustrados">
+              {SCENE_THEMES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Temas simples">
+              {SIMPLE_THEMES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </label>
         <label>
