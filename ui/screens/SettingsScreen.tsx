@@ -6,11 +6,12 @@ import { ScreenShell } from '../components/ScreenShell'
 
 interface SettingsScreenProps {
   data: BootstrapData | null
+  onRefresh?: () => Promise<void> | void
 }
 
 const THEMES = ['cartoon', 'led', 'bmo-face', 'treehouse', 'night-forest', 'dark', 'soft'] as const
 
-export function SettingsScreen({ data }: SettingsScreenProps) {
+export function SettingsScreen({ data, onRefresh }: SettingsScreenProps) {
   const [language, setLanguage] = useState(() => data?.settings?.app?.language || 'pt-BR')
   const [theme, setTheme] = useState(() => data?.settings?.app?.theme || 'cartoon')
   const [hotkey, setHotkey] = useState(() => data?.settings?.app?.hotkey || 'Ctrl+Alt+B')
@@ -29,6 +30,7 @@ export function SettingsScreen({ data }: SettingsScreenProps) {
       }
       await apiPost('/api/settings', payload)
       setMessage('Configuracao salva.')
+      await onRefresh?.()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Falha ao salvar a configuracao.')
     }

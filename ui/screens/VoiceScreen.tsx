@@ -6,9 +6,10 @@ import { ScreenShell } from '../components/ScreenShell'
 
 interface VoiceScreenProps {
   data: BootstrapData | null
+  onRefresh?: () => Promise<void> | void
 }
 
-export function VoiceScreen({ data }: VoiceScreenProps) {
+export function VoiceScreen({ data, onRefresh }: VoiceScreenProps) {
   const voices = data?.voices.voices || []
   const [selectedVoice, setSelectedVoice] = useState(() => data?.settings?.app?.voice?.model || 'pt_BR-faber-medium.onnx')
   const [selectedWhisper, setSelectedWhisper] = useState(() => data?.settings?.whisper?.model || 'base')
@@ -26,6 +27,7 @@ export function VoiceScreen({ data }: VoiceScreenProps) {
       }
       await apiPost('/api/settings', payload)
       setMessage('Preferencias de voz salvas.')
+      await onRefresh?.()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Falha ao salvar a voz.')
     }

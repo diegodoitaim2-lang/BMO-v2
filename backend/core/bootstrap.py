@@ -175,13 +175,13 @@ def list_memory_items() -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     soul = project_root() / "SOUL.md"
     if soul.exists():
-        items.append({"id": "soul", "text": soul.read_text(encoding="utf-8", errors="replace"), "source": str(soul)})
+        items.append({"id": "soul", "text": soul.read_text(encoding="utf-8", errors="replace"), "source": str(soul), "editable": False})
     memory = memory_dir() / "MEMORY.md"
     if memory.exists():
-        items.append({"id": "memory", "text": memory.read_text(encoding="utf-8", errors="replace"), "source": str(memory)})
+        items.append({"id": "memory", "text": memory.read_text(encoding="utf-8", errors="replace"), "source": str(memory), "editable": False})
     user = memory_dir() / "USER.md"
     if user.exists():
-        items.append({"id": "user", "text": user.read_text(encoding="utf-8", errors="replace"), "source": str(user)})
+        items.append({"id": "user", "text": user.read_text(encoding="utf-8", errors="replace"), "source": str(user), "editable": False})
     stored = load_json(memory_dir() / "memory.json", [])
     if isinstance(stored, list):
         for index, entry in enumerate(stored):
@@ -191,6 +191,7 @@ def list_memory_items() -> list[dict[str, Any]]:
                 "id": str(entry.get("id") or f"item-{index}"),
                 "text": str(entry.get("text") or ""),
                 "source": str(entry.get("source") or "memory.json"),
+                "editable": True,
             })
     return items
 
@@ -227,21 +228,30 @@ def build_bootstrap(runtime: AgentRuntime) -> dict[str, Any]:
     channels = list_channels()
     skills = list_skills()
     memory = list_memory_items()
-    history = list_history_sessions()
-    reminders = list_reminders()
-    subagents = list_subagents()
+    history = runtime.history_sessions(include_messages=True, message_limit=20)
+    reminders = runtime.reminder_jobs()
+    subagents = runtime.subagent_items()
     tasks = list_tasks()
     logs = tail_lines(logs_file(), 80)
     return {
         "settings": settings,
-        "system": build_system_snapshot(runtime, voices=voices, channels=channels, skills=skills, memory=memory, history=history),
+        "system": build_system_snapshot(
+            runtime,
+            voices=voices,
+            channels=channels,
+            skills=skills,
+            memory=memory,
+            history=history,
+            reminders=reminders,
+            subagents=subagents,
+        ),
         "voices": {"voices": voices, "selected": settings.get("app", {}).get("voice", {}).get("model")},
         "channels": {"channels": channels},
         "skills": {"skills": skills},
         "memory": {"items": memory},
         "history": {"sessions": history},
         "reminders": {"items": reminders},
-        "subagents": {"items": subagents, "busy": False},
+        "subagents": {"items": subagents, "busy": runtime.subagents_busy()},
         "tasks": {"items": tasks},
         "tools": {"tools": TOOL_DEFS, "runtimeTools": runtime.tool_names},
         "workspace": {"path": str(workspace_dir()), "items": list_workspace_items()},
@@ -257,12 +267,16 @@ def build_system_snapshot(
     skills: list[dict[str, Any]] | None = None,
     memory: list[dict[str, Any]] | None = None,
     history: list[dict[str, Any]] | None = None,
+    reminders: list[dict[str, Any]] | None = None,
+    subagents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     voices = voices if voices is not None else list_voice_models()
     channels = channels if channels is not None else list_channels()
     skills = skills if skills is not None else list_skills()
     memory = memory if memory is not None else list_memory_items()
-    history = history if history is not None else list_history_sessions()
+    history = history if history is not None else runtime.history_sessions()
+    reminders = reminders if reminders is not None else runtime.reminder_jobs()
+    subagents = subagents if subagents is not None else runtime.subagent_items()
     settings = load_settings()
     runtime_status = runtime.status()
     piper_exe = runtime_dir() / "piper" / "piper" / "piper.exe"
@@ -298,6 +312,8 @@ def build_system_snapshot(
             "voices": {"ok": any(voice.get("exists") for voice in voices), "count": len(voices)},
             "memory": {"ok": bool(memory), "path": str(memory_dir())},
             "history": {"ok": bool(history), "count": len(history)},
+            "reminders": {"ok": bool(reminders), "count": len(reminders)},
+            "subagents": {"ok": bool(subagents), "count": len(subagents)},
             "skills": {"ok": bool(skills), "count": len(skills)},
             "channels": {"ok": bool(channels), "items": channels},
             "workspace": {"ok": True, "path": str(workspace_dir())},
@@ -316,6 +332,8 @@ def build_system_snapshot(
         "summary": {
             "memory": len(memory),
             "history": len(history),
+            "reminders": len(reminders),
+            "subagents": len(subagents),
             "skills": len(skills),
             "channels": len(channels),
             "tools": len(TOOL_DEFS),

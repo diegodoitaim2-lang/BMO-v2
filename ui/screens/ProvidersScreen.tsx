@@ -6,9 +6,10 @@ import { ScreenShell } from '../components/ScreenShell'
 
 interface ProvidersScreenProps {
   data: BootstrapData | null
+  onRefresh?: () => Promise<void> | void
 }
 
-export function ProvidersScreen({ data }: ProvidersScreenProps) {
+export function ProvidersScreen({ data, onRefresh }: ProvidersScreenProps) {
   const [name, setName] = useState(() => data?.settings?.provider?.name || 'openrouter')
   const [model, setModel] = useState(() => data?.settings?.provider?.model || 'openai/gpt-oss-120b:free')
   const [apiKey, setApiKey] = useState(() => data?.settings?.provider?.apiKey || '')
@@ -28,6 +29,7 @@ export function ProvidersScreen({ data }: ProvidersScreenProps) {
       }
       const response = await apiPost<SettingsState>('/api/settings', payload)
       setResult(`Configuracao salva para ${response.provider?.name || name}.`)
+      await onRefresh?.()
     } catch (error) {
       setResult(error instanceof Error ? error.message : 'Falha ao salvar o provedor.')
     }

@@ -42,6 +42,14 @@ export interface MemoryItem {
   id: string
   text: string
   source?: string
+  createdAt?: number
+  editable?: boolean
+}
+
+export interface HistoryMessage {
+  role: string
+  text: string
+  createdAt?: number
 }
 
 export interface HistorySession {
@@ -50,6 +58,7 @@ export interface HistorySession {
   preview?: string
   createdAt?: number
   updatedAt?: number
+  messages?: HistoryMessage[]
 }
 
 export interface WorkspaceItem {
@@ -69,6 +78,9 @@ export interface SubagentItem {
   result?: string
   error?: string
   outputPath?: string
+  startedAt?: number
+  iteration?: number
+  phase?: string
 }
 
 export interface TaskItem {
@@ -82,14 +94,47 @@ export interface TaskItem {
 export interface ReminderItem {
   id: string
   text: string
+  name?: string
   dueAt?: number
   status?: string
+  nextRunAt?: number
+  lastRunAt?: number
+  lastError?: string
+  enabled?: boolean
+  deliver?: boolean
+  channel?: string
+  sessionKey?: string
+  schedule?: string
 }
 
 export interface ToolItem {
   name: string
   category?: string
   description?: string
+}
+
+export interface ModelProviderItem {
+  name: string
+  label: string
+  backend: string
+  gateway: boolean
+  local: boolean
+  oauth: boolean
+  defaultApiBase: string
+  detectByBaseKeyword: string
+  detectByKeyPrefix: string
+}
+
+export interface ModelCatalogData {
+  current: {
+    provider: string
+    model: string
+    apiBase: string
+    apiKeyConfigured: boolean
+    runtimeModel: string
+    runtimeReady: boolean
+  }
+  providers: ModelProviderItem[]
 }
 
 export interface SettingsState {
@@ -149,7 +194,15 @@ export interface SystemState {
     channels?: { ok?: boolean; items?: ChannelItem[] }
     workspace?: { ok?: boolean; path?: string }
   }
-  summary?: { memory?: number; history?: number; skills?: number; channels?: number; tools?: number }
+  summary?: {
+    memory?: number
+    history?: number
+    reminders?: number
+    subagents?: number
+    skills?: number
+    channels?: number
+    tools?: number
+  }
 }
 
 export interface BootstrapData {

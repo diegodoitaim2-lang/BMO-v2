@@ -386,6 +386,26 @@ img {
   border-color: rgba(82, 244, 198, 0.35);
 }
 
+button.danger {
+  border-color: rgba(255, 107, 122, 0.4);
+  background: linear-gradient(135deg, rgba(255, 107, 122, 0.18), rgba(255, 107, 122, 0.08));
+}
+
+button.danger:hover {
+  border-color: rgba(255, 107, 122, 0.65);
+}
+
+details {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.8rem;
+}
+
+summary {
+  cursor: pointer;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
 .result-text {
   margin: 0;
   color: #d0ffe8;

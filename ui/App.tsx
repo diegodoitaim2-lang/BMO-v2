@@ -123,17 +123,17 @@ function App() {
 
         <div className="panel-stage">
           {activePanel === 'Chat' && <ChatScreen data={bootstrap} setMood={setMood} />}
-          {activePanel === 'Memoria' && <MemoryScreen data={bootstrap} />}
-          {activePanel === 'Historico' && <HistoryScreen data={bootstrap} />}
-          {activePanel === 'Modelos' && <ModelsScreen data={bootstrap} />}
-          {activePanel === 'Provedores' && <ProvidersScreen key={providerFormKey} data={bootstrap} />}
-          {activePanel === 'Voz' && <VoiceScreen key={voiceFormKey} data={bootstrap} />}
-          {activePanel === 'Ferramentas' && <ToolsScreen data={bootstrap} />}
-          {activePanel === 'Workspace' && <WorkspaceScreen data={bootstrap} />}
-          {activePanel === 'Skills' && <SkillsScreen data={bootstrap} />}
+          {activePanel === 'Memoria' && <MemoryScreen data={bootstrap} onRefresh={loadBootstrap} />}
+          {activePanel === 'Historico' && <HistoryScreen data={bootstrap} onRefresh={loadBootstrap} />}
+          {activePanel === 'Modelos' && <ModelsScreen data={bootstrap} onRefresh={loadBootstrap} />}
+          {activePanel === 'Provedores' && <ProvidersScreen key={providerFormKey} data={bootstrap} onRefresh={loadBootstrap} />}
+          {activePanel === 'Voz' && <VoiceScreen key={voiceFormKey} data={bootstrap} onRefresh={loadBootstrap} />}
+          {activePanel === 'Ferramentas' && <ToolsScreen data={bootstrap} onRefresh={loadBootstrap} />}
+          {activePanel === 'Workspace' && <WorkspaceScreen data={bootstrap} onRefresh={loadBootstrap} />}
+          {activePanel === 'Skills' && <SkillsScreen data={bootstrap} onRefresh={loadBootstrap} />}
           {activePanel === 'Canais' && <ChannelsScreen data={bootstrap} />}
-          {activePanel === 'Sistema' && <SystemScreen data={bootstrap} />}
-          {activePanel === 'Configuracoes' && <SettingsScreen key={settingsFormKey} data={bootstrap} />}
+          {activePanel === 'Sistema' && <SystemScreen data={bootstrap} onRefresh={loadBootstrap} />}
+          {activePanel === 'Configuracoes' && <SettingsScreen key={settingsFormKey} data={bootstrap} onRefresh={loadBootstrap} />}
         </div>
       </main>
     </div>
