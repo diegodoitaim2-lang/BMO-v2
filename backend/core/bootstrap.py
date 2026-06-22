@@ -22,6 +22,7 @@ from backend.core.config.paths import (
 )
 from backend.core.config.settings import load_settings
 from backend.core.store import load_json, tail_lines
+from backend.core.voice import piper_ready, whisper_ready, whisper_status
 
 
 VOICE_DEFS = [
@@ -279,14 +280,14 @@ def build_system_snapshot(
     subagents = subagents if subagents is not None else runtime.subagent_items()
     settings = load_settings()
     runtime_status = runtime.status()
-    piper_exe = runtime_dir() / "piper" / "piper" / "piper.exe"
-    whisper_exe = runtime_dir() / "whisper.cpp" / "Win32" / "Release" / "whisper-cli.exe"
+    piper_ok = piper_ready()
+    whisper_ok = whisper_ready()
+    whisper_info = whisper_status()
     wakeword_model = runtime_dir() / "wakeword.onnx"
-    whisper_model = runtime_dir() / "whisper.cpp" / "models" / "ggml-base.bin"
     return {
         "backend": True,
-        "piper": piper_exe.exists() and any(voice.get("exists") for voice in voices),
-        "whisper": whisper_exe.exists() and whisper_model.exists(),
+        "piper": piper_ok,
+        "whisper": whisper_ok,
         "wakeword": {
             "enabled": wakeword_model.exists(),
             "available": wakeword_model.exists(),
@@ -327,7 +328,9 @@ def build_system_snapshot(
             "enabled": settings.get("app", {}).get("voice", {}).get("enabled", True),
             "model": settings.get("app", {}).get("voice", {}).get("model", "pt_BR-faber-medium.onnx"),
             "models": voices,
+            "ready": piper_ok,
         },
+        "whisperStatus": whisper_info,
         "settings": settings,
         "summary": {
             "memory": len(memory),

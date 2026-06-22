@@ -26,8 +26,9 @@ from backend.core.bootstrap import (
     list_voice_models,
     list_workspace_items,
 )
-from backend.core.config.paths import ensure_layout, logs_file, runtime_dir, workspace_dir
+from backend.core.config.paths import ensure_layout, logs_file, workspace_dir
 from backend.core.config.settings import load_settings, merge_settings
+from backend.core.voice import piper_ready, speak_text, test_whisper_runtime, whisper_status
 from backend.core.store import tail_lines
 from nanobot.providers.registry import PROVIDERS
 
@@ -166,6 +167,20 @@ def voices() -> dict[str, Any]:
     return {
         "voices": models,
         "selected": settings.get("app", {}).get("voice", {}).get("model"),
+        "ready": piper_ready(),
+    }
+
+
+@app.get("/api/voice/status")
+def voice_status() -> dict[str, Any]:
+    settings = load_settings()
+    selected_voice = settings.get("app", {}).get("voice", {}).get("model")
+    selected_whisper = settings.get("whisper", {}).get("model")
+    return {
+        "piper": piper_ready(),
+        "whisper": whisper_status(selected_whisper),
+        "selectedVoice": selected_voice,
+        "selectedWhisper": selected_whisper,
     }
 
 
@@ -364,20 +379,27 @@ def chat(payload: ChatPayload) -> dict[str, Any]:
 def speak(payload: SpeakPayload) -> dict[str, Any]:
     settings = load_settings()
     voice = payload.voice or settings.get("app", {}).get("voice", {}).get("model", "")
-    voice_path = runtime_dir() / "piper" / (voice or "pt_BR-faber-medium.onnx")
-    if not voice_path.exists():
-        return {"ok": False, "message": "Modelo de voz nao encontrado.", "voice": voice}
-    return {"ok": True, "voice": voice, "message": "Voz disponivel para gerar audio quando o Piper estiver configurado."}
+    try:
+        return speak_text(payload.text, voice)
+    except Exception as error:
+        return {
+            "ok": False,
+            "message": str(error),
+            "voice": voice,
+            "audioDataUrl": "",
+        }
 
 
 @app.post("/api/whisper/test")
 def whisper_test(payload: WhisperTestPayload | None = None) -> dict[str, Any]:
     model = (payload.model if payload else None) or load_settings().get("whisper", {}).get("model", "base")
-    whisper_exe = runtime_dir() / "whisper.cpp" / "Win32" / "Release" / "whisper-cli.exe"
-    exists = whisper_exe.exists()
-    return {
-        "ok": exists,
-        "message": "Whisper pronto." if exists else "Whisper ainda nao foi encontrado no runtime.",
-        "mode": "local",
-        "whisper": {"model": model, "exe": str(whisper_exe), "ready": exists},
-    }
+    try:
+        return test_whisper_runtime(model_name=model)
+    except Exception as error:
+        return {
+            "ok": False,
+            "message": str(error),
+            "language": "pt",
+            "transcript": "",
+            "whisper": whisper_status(model),
+        }

@@ -184,7 +184,7 @@ export interface SystemState {
     model?: string
   }
   provider?: { ok?: boolean; name?: string; model?: string }
-  voice?: { enabled?: boolean; model?: string; models?: VoiceModel[] }
+  voice?: { enabled?: boolean; model?: string; models?: VoiceModel[]; ready?: boolean }
   diagnostic?: {
     provider?: { ok?: boolean; name?: string; model?: string }
     voices?: { ok?: boolean; count?: number }
@@ -208,7 +208,7 @@ export interface SystemState {
 export interface BootstrapData {
   settings: SettingsState
   system: SystemState
-  voices: { voices: VoiceModel[]; selected?: string }
+  voices: { voices: VoiceModel[]; selected?: string; ready?: boolean }
   channels: { channels: ChannelItem[] }
   skills: { skills: SkillItem[] }
   memory: { items: MemoryItem[] }
